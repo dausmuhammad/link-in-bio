@@ -1,4 +1,10 @@
 import { test, expect } from "@playwright/test";
+// Preserve the original English workflow coverage; locale tests cover the new default.
+test.beforeEach(async ({ context }) => {
+  await context.addCookies([
+    { name: "linkspace-locale", value: "en", url: "http://127.0.0.1:3000" },
+  ]);
+});
 for (const width of [375, 390, 768, 1024, 1440]) {
   test(`responsive pages at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
@@ -61,9 +67,18 @@ test("local draft, live preview, links, ordering and validation", async ({
     name: "Reorder New project",
     exact: true,
   });
+  await handle.scrollIntoViewIfNeeded();
+  await handle.click({ trial: true });
   await handle.focus();
   await page.keyboard.press("Space");
   await expect(handle).toHaveAttribute("aria-pressed", "true");
+  // KeyboardSensor measures droppable rectangles on the next animation frame.
+  await page.evaluate(
+    () =>
+      new Promise((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(resolve)),
+      ),
+  );
   await page.keyboard.press("ArrowUp");
   await expect(page.locator("[id^=DndLiveRegion]")).toContainText(
     "over droppable area collaborate",

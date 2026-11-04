@@ -1,4 +1,7 @@
 "use client";
+
+import { LanguageSelector } from "@/components/language-selector";
+import { useLanguage } from "@/components/language-provider";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -13,6 +16,7 @@ import {
 import { Brand } from "./brand";
 import { ThemeToggle } from "./theme-toggle";
 export function DashboardShell({ children }) {
+  const { t } = useLanguage();
   const path = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   return (
@@ -22,7 +26,7 @@ export function DashboardShell({ children }) {
           <Brand />
           <button
             className="icon-button"
-            aria-label="Collapse sidebar"
+            aria-label={t("Collapse sidebar")}
             onClick={() => setCollapsed(!collapsed)}
           >
             {collapsed ? (
@@ -32,7 +36,7 @@ export function DashboardShell({ children }) {
             )}
           </button>
         </div>
-        <span className="sidebar-label">YOUR WORKSPACE</span>
+        <span className="sidebar-label">{t("YOUR WORKSPACE")}</span>
         <nav>
           {[
             ["/dashboard", "Overview", LayoutDashboard],
@@ -44,46 +48,48 @@ export function DashboardShell({ children }) {
               className={path === href ? "active" : ""}
             >
               <Icon size={20} />
-              <span>{label}</span>
+              <span>{t(label)}</span>
             </Link>
           ))}
           <Link href="/alexrivera" target="_blank">
             <ArrowUpRight size={20} />
-            <span>Example public page</span>
+            <span>{t("Example public page")}</span>
           </Link>
         </nav>
         <div className="sidebar-bottom">
           <div className="plan-card">
-            <span className="eyebrow">ROOM TO GROW</span>
-            <h3>Your next chapter</h3>
-            <p>Explore what’s planned for Pro.</p>
-            <Link href="/pricing">Discover Pro →</Link>
+            <span className="eyebrow">{t("ROOM TO GROW")}</span>
+            <h3>{t("Your next chapter")}</h3>
+            <p>{t("Explore what\u2019s planned for Pro.")}</p>
+            <Link href="/pricing">{t("Discover Pro \u2192")}</Link>
           </div>
           <Link href="/" className="exit-link">
             <LogOut size={18} />
-            <span>Leave demo</span>
+            <span>{t("Leave demo")}</span>
           </Link>
         </div>
       </aside>
       <div className="workspace">
         <header className="workspace-header">
           <span>
-            Workspace{" "}
+            {t("Workspace")}{" "}
             <span className="muted">
-              / {path.includes("builder") ? "Page builder" : "Overview"}
+              / {t(path.includes("builder") ? "Page builder" : "Overview")}
             </span>
           </span>
           <div className="nav-actions">
-            <span className="demo-badge">DEMO MODE</span>
+            <span className="demo-badge">{t("DEMO MODE")}</span>
+            <LanguageSelector />
             <ThemeToggle />
-            <span className="small-avatar">AR</span>
+            <span className="small-avatar">{t("AR")}</span>
           </div>
         </header>
         <div className="demo-banner">
-          Development demo · No login required. Drafts stay in this browser. No
-          live publishing or real analytics.
+          {t(
+            "Development demo \xB7 No login required. Drafts stay in this browser. No live publishing or real analytics.",
+          )}
         </div>
-        {children}
+        {t(children)}
       </div>
     </div>
   );

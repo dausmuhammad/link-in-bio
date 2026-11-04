@@ -1,6 +1,9 @@
+"use client";
+import { useLanguage } from "@/components/language-provider";
 import { ArrowUpRight, Camera, Video, Orbit } from "lucide-react";
 import { safeUrl } from "@/lib/demo";
 export function PublicProfile({ profile, compact = false }) {
+  const { t } = useLanguage();
   return (
     <section
       className={`profile-page theme-${profile.theme.toLowerCase().replaceAll(" ", "-")} ${compact ? "compact" : ""}`}
@@ -10,7 +13,7 @@ export function PublicProfile({ profile, compact = false }) {
       <div className="avatar">
         {profile.initials || profile.name.slice(0, 2).toUpperCase()}
       </div>
-      <h2>{profile.name || "Your name"}</h2>
+      <h2>{profile.name || t("Your name")}</h2>
       <p className="handle">@{profile.username}</p>
       <p className="profile-bio">{profile.bio}</p>
       <div className="socials">
@@ -56,7 +59,7 @@ export function PublicProfile({ profile, compact = false }) {
           ))}
       </div>
       <div className="profile-footer">
-        <Orbit size={16} /> Made with LinkSpace
+        <Orbit size={16} /> {t("Made with LinkSpace")}
       </div>
     </section>
   );

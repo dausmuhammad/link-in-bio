@@ -50,3 +50,13 @@ Design tokens di `globals.css`: violet, slate, radius 12–20px, input 16px, foc
 Belum ada PostgreSQL/Prisma, Auth.js, otorisasi, upload, publikasi, tracking, atau billing. Dashboard tidak dilindungi karena secara eksplisit merupakan demo tanpa akun. Phase 2 harus menambahkan sesi database, kepemilikan server-side, migrasi, validasi server, storage object, dan publishing; jangan membawa localStorage ini sebagai database produksi. File `.env.example` berisi nama variabel yang direncanakan; Phase 1 tidak memerlukan secret.
 
 Sesuai `LINKSPACE_CODEX_PROMPT.md`, Phase 2 menunggu persetujuan pemilik proyek.
+
+## Pilihan bahasa
+
+Antarmuka mendukung **Indonesia (default)** dan **English**. Gunakan pemilih bahasa pada navigasi, halaman autentikasi, harga, atau profil contoh. Pilihan disimpan di cookie `linkspace-locale` selama satu tahun dan berlaku untuk seluruh situs. Tanpa pilihan tersimpan, bahasa selalu Indonesia; preferensi bahasa browser tidak mengubah default ini. Nilai bahasa yang tidak didukung kembali ke Indonesia.
+
+Server membaca cookie dengan API `cookies()` Next.js sehingga HTML awal, metadata, dan atribut `lang` sesuai pilihan tanpa kilasan antarmuka Inggris. Halaman sekarang dirender per permintaan. Komponen interaktif memakai `LanguageProvider`; pergantian bahasa menyegarkan Server Components tanpa mengosongkan draf editor. Bio, nama, judul tautan, dan konten pengguna tidak diterjemahkan.
+
+Kamus berada di `src/lib/i18n/messages.js`, dengan teks Inggris sebagai kunci dan padanan Indonesia. Gunakan `getTranslator()` untuk Server Components atau `useLanguage()` untuk Client Components. Parameter dinamis memakai placeholder bernama seperti `Last {count} days`; jangan merangkai urutan kata antarbahasa. Tambahkan padanan Indonesia saat menambah teks UI baru. Nama tema internal dan data draf tetap stabil meski label tampilan berubah bahasa.
+
+Tes bahasa memverifikasi default SSR, persistensi pilihan saat navigasi/reload, validasi form, fallback bahasa tidak didukung, perlindungan isi draf, serta responsivitas kedua bahasa pada lima breakpoint.

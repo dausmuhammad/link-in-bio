@@ -1,4 +1,6 @@
 "use client";
+
+import { useLanguage } from "@/components/language-provider";
 import { useSyncExternalStore } from "react";
 import { Moon, Sun } from "lucide-react";
 function subscribe(cb) {
@@ -6,6 +8,7 @@ function subscribe(cb) {
   return () => window.removeEventListener("themechange", cb);
 }
 export function ThemeToggle() {
+  const { t } = useLanguage();
   const dark = useSyncExternalStore(
     subscribe,
     () => document.documentElement.dataset.theme === "dark",
@@ -24,7 +27,7 @@ export function ThemeToggle() {
   return (
     <button
       className="icon-button"
-      aria-label="Toggle color theme"
+      aria-label={t("Toggle color theme")}
       onClick={toggle}
     >
       {dark ? <Sun size={20} /> : <Moon size={20} />}

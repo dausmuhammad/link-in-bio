@@ -1,4 +1,6 @@
 "use client";
+
+import { useLanguage } from "@/components/language-provider";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
@@ -38,17 +40,25 @@ import {
 } from "@/lib/demo";
 const key = "linkspace-demo-draft-v1";
 function SortableLink({ link, update, remove }) {
+  const { t } = useLanguage();
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: link.id });
+    useSortable({
+      id: link.id,
+    });
   return (
     <div
       ref={setNodeRef}
       className="link-editor"
-      style={{ transform: CSS.Transform.toString(transform), transition }}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+      }}
     >
       <button
         className="icon-button drag-handle"
-        aria-label={`Reorder ${link.title}`}
+        aria-label={t("Reorder {title}", {
+          title: link.title,
+        })}
         {...attributes}
         {...listeners}
       >
@@ -56,25 +66,33 @@ function SortableLink({ link, update, remove }) {
       </button>
       <div className="link-fields">
         <label>
-          Link title
+          {t("Link title")}
           <input
             value={link.title}
             maxLength={100}
-            onChange={(e) => update({ title: e.target.value })}
+            onChange={(e) =>
+              update({
+                title: e.target.value,
+              })
+            }
           />
         </label>
         <label>
-          Destination URL
+          {t("Destination URL")}
           <input
             type="url"
             value={link.url}
-            onChange={(e) => update({ url: e.target.value })}
+            onChange={(e) =>
+              update({
+                url: e.target.value,
+              })
+            }
             aria-invalid={!safeUrl(link.url)}
           />
         </label>
         {!safeUrl(link.url) && (
           <p className="field-error">
-            Use a valid http:// or https:// address.
+            {t("Use a valid http:// or https:// address.")}
           </p>
         )}
       </div>
@@ -83,13 +101,19 @@ function SortableLink({ link, update, remove }) {
           <input
             type="checkbox"
             checked={link.active}
-            onChange={(e) => update({ active: e.target.checked })}
+            onChange={(e) =>
+              update({
+                active: e.target.checked,
+              })
+            }
           />
-          Enabled
+          {t("Enabled")}
         </label>
         <button
           className="icon-button danger"
-          aria-label={`Delete ${link.title}`}
+          aria-label={t("Delete {title}", {
+            title: link.title,
+          })}
           onClick={remove}
         >
           <Trash2 size={18} />
@@ -99,6 +123,7 @@ function SortableLink({ link, update, remove }) {
   );
 }
 export function Builder() {
+  const { t } = useLanguage();
   const search = useSearchParams();
   const [profile, setProfile] = useState(demoProfile);
   const [saved, setSaved] = useState(JSON.stringify(demoProfile));
@@ -108,7 +133,11 @@ export function Builder() {
   const [ready, setReady] = useState(false);
   const dirty = JSON.stringify(profile) !== saved;
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 6,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
@@ -125,7 +154,11 @@ export function Builder() {
           setSaved(JSON.stringify(p));
         }
         const theme = search.get("theme");
-        if (themes.includes(theme)) setProfile((p) => ({ ...p, theme }));
+        if (themes.includes(theme))
+          setProfile((p) => ({
+            ...p,
+            theme,
+          }));
       } catch {
         setNotice(
           "Could not read your local draft. The example is loaded; save to replace it.",
@@ -149,7 +182,7 @@ export function Builder() {
         a &&
         a.target !== "_blank" &&
         !a.getAttribute("href").startsWith("#") &&
-        !window.confirm("You have unsaved demo changes. Leave this page?")
+        !window.confirm(t("You have unsaved demo changes. Leave this page?"))
       ) {
         e.preventDefault();
         e.stopPropagation();
@@ -161,9 +194,12 @@ export function Builder() {
       window.removeEventListener("beforeunload", unload);
       document.removeEventListener("click", click, true);
     };
-  }, [dirty]);
+  }, [dirty, t]);
   function patch(values) {
-    setProfile((p) => ({ ...p, ...values }));
+    setProfile((p) => ({
+      ...p,
+      ...values,
+    }));
     setNotice("");
   }
   function save() {
@@ -196,41 +232,43 @@ export function Builder() {
   if (!ready)
     return (
       <main className="dashboard-content" aria-busy="true">
-        Loading your local draft…
+        {t("Loading your local draft\u2026")}
       </main>
     );
   return (
     <main className="dashboard-content builder-content">
       <div className="page-heading">
         <div>
-          <span className="eyebrow">A SPACE THAT FEELS LIKE YOU</span>
-          <h1>Make it your own.</h1>
-          <p>Your story, your links, your little corner of the internet.</p>
+          <span className="eyebrow">{t("A SPACE THAT FEELS LIKE YOU")}</span>
+          <h1>{t("Make it your own.")}</h1>
+          <p>
+            {t("Your story, your links, your little corner of the internet.")}
+          </p>
         </div>
         <div className="save-actions">
           <span className={dirty ? "unsaved" : "saved"}>
-            {dirty ? "Unsaved changes" : "No unsaved changes"}
+            {t(dirty ? "Unsaved changes" : "No unsaved changes")}
           </span>
           <Button onClick={save}>
             <Save size={17} />
-            Save demo draft
+            {t("Save demo draft")}
           </Button>
         </div>
       </div>
       <div className="mobile-tabs">
-        {["Edit", "Preview"].map((t) => (
+        {["Edit", "Preview"].map((labelText) => (
           <button
-            className={mobileTab === t ? "selected" : ""}
-            key={t}
-            onClick={() => setMobileTab(t)}
+            className={mobileTab === labelText ? "selected" : ""}
+            key={labelText}
+            onClick={() => setMobileTab(labelText)}
           >
-            {t}
+            {t(labelText)}
           </button>
         ))}
       </div>
       {notice && (
         <div className="notice" role="status">
-          {notice}
+          {t(notice)}
         </div>
       )}
       <div className={`builder-grid showing-${mobileTab.toLowerCase()}`}>
@@ -238,7 +276,7 @@ export function Builder() {
           <div
             className="editor-tabs"
             role="tablist"
-            aria-label="Builder sections"
+            aria-label={t("Builder sections")}
           >
             {["Profile", "Links", "Socials", "Appearance", "Settings"].map(
               (s) => (
@@ -248,39 +286,49 @@ export function Builder() {
                   aria-selected={section === s}
                   onClick={() => setSection(s)}
                 >
-                  {s}
+                  {t(s)}
                 </button>
               ),
             )}
           </div>
           <motion.div
             key={section}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.15 }}
+            initial={{
+              opacity: 0,
+            }}
+            animate={{
+              opacity: 1,
+            }}
+            transition={{
+              duration: 0.15,
+            }}
             className="editor-section"
             role="tabpanel"
           >
             <div className="section-intro">
               <h2>
-                {section === "Profile"
-                  ? "A little introduction"
-                  : section === "Links"
-                    ? "Where should we go?"
-                    : section === "Socials"
-                      ? "Keep the conversation going"
-                      : section === "Appearance"
-                        ? "Find your signature look"
-                        : "The little details"}
+                {t(
+                  section === "Profile"
+                    ? "A little introduction"
+                    : section === "Links"
+                      ? "Where should we go?"
+                      : section === "Socials"
+                        ? "Keep the conversation going"
+                        : section === "Appearance"
+                          ? "Find your signature look"
+                          : "The little details",
+                )}
               </h2>
               <p>
-                {section === "Profile"
-                  ? "Give people a glimpse of the person behind the links."
-                  : section === "Links"
-                    ? "Drag to reorder, or use Space and arrow keys on the handle."
-                    : section === "Appearance"
-                      ? "Start with a theme. Make the details your own."
-                      : "Every change appears in your preview instantly."}
+                {t(
+                  section === "Profile"
+                    ? "Give people a glimpse of the person behind the links."
+                    : section === "Links"
+                      ? "Drag to reorder, or use Space and arrow keys on the handle."
+                      : section === "Appearance"
+                        ? "Start with a theme. Make the details your own."
+                        : "Every change appears in your preview instantly.",
+                )}
               </p>
             </div>
             {section === "Profile" && (
@@ -288,12 +336,16 @@ export function Builder() {
                 <div className="avatar-editor">
                   <div className="avatar">{profile.initials}</div>
                   <div>
-                    <strong>Your profile avatar</strong>
-                    <p>Initials preview · Image uploads arrive in Phase 2.</p>
+                    <strong>{t("Your profile avatar")}</strong>
+                    <p>
+                      {t(
+                        "Initials preview \xB7 Image uploads arrive in Phase 2.",
+                      )}
+                    </p>
                   </div>
                 </div>
                 <label>
-                  Display name
+                  {t("Display name")}
                   <input
                     maxLength={60}
                     value={profile.name}
@@ -306,32 +358,41 @@ export function Builder() {
                   />
                 </label>
                 <label>
-                  Bio
+                  {t("Bio")}
                   <textarea
+                    aria-label={t("Bio")}
                     rows={4}
                     maxLength={200}
                     value={profile.bio}
-                    onChange={(e) => patch({ bio: e.target.value })}
+                    onChange={(e) =>
+                      patch({
+                        bio: e.target.value,
+                      })
+                    }
                   />
                   <span className="helper">
-                    A few words go a long way. {profile.bio.length}/200
+                    {t("A few words go a long way.")} {t(profile.bio.length)}
+                    /200
                   </span>
                 </label>
                 <label>
-                  Username
+                  {t("Username")}
                   <div className="input-prefix">
-                    <span>linkspace /</span>
+                    <span>{t("linkspace /")}</span>
                     <input
                       value={profile.username}
                       maxLength={30}
                       onChange={(e) =>
-                        patch({ username: e.target.value.toLowerCase() })
+                        patch({
+                          username: e.target.value.toLowerCase(),
+                        })
                       }
                     />
                   </div>
                   <span className="helper">
-                    Availability will be checked against the database in Phase
-                    2.
+                    {t(
+                      "Availability will be checked against the database in Phase 2.",
+                    )}
                   </span>
                 </label>
               </>
@@ -363,7 +424,12 @@ export function Builder() {
                         update={(data) =>
                           patch({
                             links: profile.links.map((l) =>
-                              l.id === link.id ? { ...l, ...data } : l,
+                              l.id === link.id
+                                ? {
+                                    ...l,
+                                    ...data,
+                                  }
+                                : l,
                             ),
                           })
                         }
@@ -380,8 +446,10 @@ export function Builder() {
                 </DndContext>
                 {!profile.links.length && (
                   <div className="empty-state">
-                    <h3>Your first link starts here.</h3>
-                    <p>Add something you’d love people to discover.</p>
+                    <h3>{t("Your first link starts here.")}</h3>
+                    <p>
+                      {t("Add something you\u2019d love people to discover.")}
+                    </p>
                   </div>
                 )}
                 <Button
@@ -393,7 +461,7 @@ export function Builder() {
                         ...profile.links,
                         {
                           id: crypto.randomUUID(),
-                          title: "My new link",
+                          title: t("My new link"),
                           url: "https://example.com",
                           active: true,
                         },
@@ -402,76 +470,92 @@ export function Builder() {
                   }
                 >
                   <Plus size={18} />
-                  Add a link
+                  {t("Add a link")}
                 </Button>
               </>
             )}
             {section === "Socials" &&
               Object.entries(profile.socials).map(([name, url]) => (
                 <label key={name}>
-                  {name} URL
+                  {t(name)} {t("URL")}
                   <input
                     type="url"
                     value={url}
                     placeholder="https://"
                     onChange={(e) =>
                       patch({
-                        socials: { ...profile.socials, [name]: e.target.value },
+                        socials: {
+                          ...profile.socials,
+                          [name]: e.target.value,
+                        },
                       })
                     }
                   />
                   <span className="helper">
-                    Leave empty to hide this social profile.
+                    {t("Leave empty to hide this social profile.")}
                   </span>
                 </label>
               ))}
             {section === "Appearance" && (
               <>
                 <fieldset>
-                  <legend>Choose your canvas</legend>
+                  <legend>{t("Choose your canvas")}</legend>
                   <div className="theme-picker">
                     {themes.map((theme) => (
                       <button
                         key={theme}
                         className={`theme-choice ${profile.theme === theme ? "chosen" : ""}`}
                         aria-pressed={profile.theme === theme}
-                        onClick={() => patch({ theme })}
+                        onClick={() =>
+                          patch({
+                            theme,
+                          })
+                        }
                       >
                         <span
                           className={`theme-chip theme-${theme.toLowerCase().replaceAll(" ", "-")}`}
                         >
                           {profile.theme === theme && <Check size={20} />}
                         </span>
-                        {theme}
+                        {t(theme)}
                       </button>
                     ))}
                   </div>
                 </fieldset>
                 <fieldset>
-                  <legend>Button shape</legend>
+                  <legend>{t("Button shape")}</legend>
                   <div className="segmented">
                     {["rounded", "pill", "square"].map((shape) => (
                       <button
                         aria-pressed={profile.shape === shape}
                         className={profile.shape === shape ? "selected" : ""}
                         key={shape}
-                        onClick={() => patch({ shape })}
+                        onClick={() =>
+                          patch({
+                            shape,
+                          })
+                        }
                       >
-                        {shape}
+                        {t(shape)}
                       </button>
                     ))}
                   </div>
                 </fieldset>
                 <label>
-                  Accent color
+                  {t("Accent color")}
                   <input
                     type="color"
                     value={profile.accent}
-                    onChange={(e) => patch({ accent: e.target.value })}
+                    onChange={(e) =>
+                      patch({
+                        accent: e.target.value,
+                      })
+                    }
                   />
                   <span className="helper">
-                    Accent decorates the avatar. Theme text colors remain
-                    readable.
+                    {t(
+                      "Accent decorates the avatar. Theme text colors remain readable.",
+                    )}
                   </span>
                 </label>
               </>
@@ -479,11 +563,11 @@ export function Builder() {
             {section === "Settings" && (
               <>
                 <div className="settings-callout">
-                  <h3>This is your development playground.</h3>
+                  <h3>{t("This is your development playground.")}</h3>
                   <p>
-                    Drafts stay on this device. Authentication, username
-                    registration, account settings, uploads, and public
-                    publishing are not connected yet.
+                    {t(
+                      "Drafts stay on this device. Authentication, username registration, account settings, uploads, and public publishing are not connected yet.",
+                    )}
                   </p>
                 </div>
                 <Button
@@ -491,37 +575,41 @@ export function Builder() {
                   onClick={() => {
                     if (
                       window.confirm(
-                        "Reset your editor to the example? Save afterward to replace your stored draft.",
+                        t(
+                          "Reset your editor to the example? Save afterward to replace your stored draft.",
+                        ),
                       )
                     ) {
                       patch(structuredClone(demoProfile));
                     }
                   }}
                 >
-                  Reset editor to example
+                  {t("Reset editor to example")}
                 </Button>
                 <p className="helper">
-                  Reset requires saving to update browser storage. No account or
-                  server data will be deleted.
+                  {t(
+                    "Reset requires saving to update browser storage. No account or server data will be deleted.",
+                  )}
                 </p>
               </>
             )}
           </motion.div>
           <div className="editor-footer">
-            <span className="status-dot" /> Local preview · Not published
+            <span className="status-dot" />{" "}
+            {t("Local preview \xB7 Not published")}
           </div>
         </section>
         <aside className="preview-panel">
           <div className="preview-heading">
             <span>
               <Smartphone size={17} />
-              Live preview
+              {t("Live preview")}
             </span>
             <a
               href="/alexrivera"
               target="_blank"
               rel="noreferrer"
-              aria-label="Open fixed example public page"
+              aria-label={t("Open fixed example public page")}
             >
               <ExternalLink size={17} />
             </a>
@@ -531,9 +619,9 @@ export function Builder() {
             <PublicProfile profile={profile} compact />
           </div>
           <p className="helper">
-            Your changes, as they happen.
+            {t("Your changes, as they happen.")}
             <br />
-            This preview does not publish your page.
+            {t("This preview does not publish your page.")}
           </p>
         </aside>
       </div>
